@@ -8,7 +8,7 @@ mod scheduler {
     use serde_json::Value;
 
     use flow::add::AddNode;
-
+    use flow::error_dummy::ErrorDummyNode;
 
     #[test]
     fn test() {
@@ -57,7 +57,7 @@ mod scheduler {
     #[test]
     fn test2() {
          
-        let context = State::new(Context::new());
+        let context: State<Context> = State::new(Context::new());
 
         let add = AddNode::<i32, i32, i32>::new("AddNodeI32", context, Value::Null);
         let mock_output = Edge::new();        
@@ -80,5 +80,24 @@ mod scheduler {
 
     }
 
+    #[test]
+    fn test3() {
 
+       let context: State<Context> = State::new(Context::new());
+
+       let node_1 = ErrorDummyNode::new("node_1");
+       let node_2 = ErrorDummyNode::new("node_1");
+       let mut flow = Flow::new("flow_1", Version::new(1,0,0));
+      
+       flow.add_node(node_1);
+       flow.add_node(node_2);
+
+       let mut ex = MultiThreadedExecutor::new(1, context);
+
+       match ex.run(flow, RoundRobinScheduler::new()) {
+        Ok(_) => todo!(),
+        Err(err) => eprintln!("Error: {:?}", err)
+       }
+
+    }
 } 

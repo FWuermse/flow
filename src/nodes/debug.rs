@@ -5,10 +5,9 @@ use serde_json::Value;
 use crate::{
     connection::{Input, Output, RuntimeConnectable},
     node::{State, UpdateError},
-    nodes::node::Node,
-};
+    nodes::node::{Context, Node, InitError, ReadyError, ShutdownError},
 
-use super::node::Context;
+};
 
 pub struct DebugNode<I>
 where
@@ -43,11 +42,17 @@ impl<I> Node for DebugNode<I>
 where
     I: Clone + Debug + Send + 'static,
 {
-    fn on_init(&self) {}
+    fn on_init(&self) -> Result<(), InitError>{
+        Ok(())
+    }
 
-    fn on_ready(&self) {}
+    fn on_ready(&self)-> Result<(), ReadyError> {
+        Ok(())
+    }
 
-    fn on_shutdown(&self) {}
+    fn on_shutdown(&self) -> Result<(), ShutdownError>{
+        Ok(())
+    }
 
     fn name(&self) -> &str {
         &self.name

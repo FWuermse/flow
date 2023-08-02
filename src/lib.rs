@@ -6,6 +6,7 @@ pub use self::nodes::basic;
 pub use self::nodes::connection;
 pub use self::nodes::debug;
 pub use self::nodes::node;
+pub use self::nodes::error_dummy;
 
 pub use self::flow::app_state;
 pub use self::flow::scheduler;

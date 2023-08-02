@@ -144,6 +144,7 @@ impl AppState {
     }
 
     pub fn run(&mut self) {
+        /*
         self.nodes.iter_mut().for_each(|job| job.on_init());
         self.nodes.iter_mut().for_each(|job| job.on_ready());
         // Capped at 100 here for testing purposes. TODO: change to infinite loop with stop condition.
@@ -153,6 +154,7 @@ impl AppState {
             });
         }
         self.nodes.iter_mut().for_each(|job| job.on_shutdown());
+        */
     }
 }
 

@@ -1,4 +1,5 @@
-use std::{thread, sync::{ Arc, Mutex}};
+use std::{sync::{ Arc, Mutex}};
+use anyhow::{Context, Result};
 
 use crate::{
     node::Node,
@@ -30,21 +31,29 @@ impl Flow {
         self.nodes.len()
     }
 
-    pub fn init_all(&self) {
+    pub fn init_all(&self) -> Result<()> {
         for n in &self.nodes {
-            n.lock().unwrap().on_init();
+            let name :String = n.lock().unwrap().name().to_string();
+            n.lock().unwrap().on_init().context(format!("Unable to init node '{}'.", name))?;
         }
+        Ok(())
     }
 
-    pub fn shutdown_all(&self) {
+    pub fn shutdown_all(&self) -> Result<()> {
         for n in &self.nodes {
-            n.lock().unwrap().on_shutdown();
+            let name :String = n.lock().unwrap().name().to_string();
+            n.lock().unwrap().on_shutdown().context(format!("Unable to shutdown node '{}'.", name))?;
         }
+        Ok(())
+
     }
 
-    pub fn ready_all(&self) {
+    pub fn ready_all(&self) -> Result<()> {
         for n in &self.nodes {
-            n.lock().unwrap().on_ready();
+            let name :String = n.lock().unwrap().name().to_string();
+            n.lock().unwrap().on_ready().context(format!("Unable to make node '{}' ready.", name))?;
         }
+        Ok(())
+
     }
 }

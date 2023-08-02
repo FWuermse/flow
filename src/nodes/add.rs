@@ -5,7 +5,7 @@ use std::rc::Rc;
 use flow_derive::Connectable;
 use serde_json::Value;
 
-use super::node::{Context, Node};
+use super::node::{Context, Node, InitError, ShutdownError, ReadyError};
 use crate::connection::{Input, Output, RuntimeConnectable};
 use crate::node::{SequenceError, State, UpdateError};
 
@@ -58,10 +58,10 @@ where
         let mut state = self.state.0.lock().unwrap();
         match state.clone() {
             AddNodeState::I1(_) => {
-                return Err(UpdateError::SequenceError(SequenceError {
+                return Err(UpdateError::SequenceError {
                     node: self.name().into(),
                     message: "Addition should happen pairwise.".into(),
-                }))
+                })
             }
             AddNodeState::I2(i) => {
                 let out = v + i.clone();
@@ -77,10 +77,10 @@ where
         let mut state = self.state.0.lock().unwrap();
         match state.clone() {
             AddNodeState::I2(_) => {
-                return Err(UpdateError::SequenceError(SequenceError {
+                return Err(UpdateError::SequenceError {
                     node: self.name().into(),
                     message: "Addition should happen pairwise.".into(),
-                }))
+                })
             }
             AddNodeState::I1(i) => {
                 let out = i.clone() + v;
@@ -99,11 +99,17 @@ where
     I2: Clone + Send + 'static,
     O: Clone + Send + 'static,
 {
-    fn on_init(&self) {}
+    fn on_init(&self) -> Result<(), InitError>{ 
+        Ok(())
+    }
 
-    fn on_ready(&self) {}
+    fn on_ready(&self)   -> Result<(), ReadyError>{
+        Ok(())
+    }
 
-    fn on_shutdown(&self) {}
+    fn on_shutdown(&self)  -> Result<(), ShutdownError> {
+        Ok(())
+    }
 
     fn name(&self) -> &str {
         &self.name

@@ -5,6 +5,7 @@ use crate::{
     scheduler::{Scheduler,SchedulingInfo},
     flow::flow_type::Flow,
 };
+use anyhow::{Context as AnyhowContext, Result};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum ExecutorState {
@@ -117,7 +118,7 @@ impl ChangeObserver for ExecutionHibernator {
 
 pub trait Executor {
 
-    fn run<S>(&mut self, flow :Flow, scheduler: S)  where S : Scheduler + std::marker::Send;
+    fn run<S>(&mut self, flow :Flow, scheduler: S) -> Result<()>  where S : Scheduler + std::marker::Send;
     
     fn controller(&self) -> Arc<Mutex<ExecutionController>>;
 }
@@ -205,19 +206,18 @@ impl MultiThreadedExecutor {
 
 impl Executor for MultiThreadedExecutor{
    
-    fn run<S>(&mut self, mut flow: Flow, mut scheduler: S) 
+    fn run<S>(&mut self, mut flow: Flow, mut scheduler: S) -> Result<()> 
     where S : Scheduler + std::marker::Send {
 
-        flow.init_all(); 
+        flow.init_all().context(format!("Unable to init all nodes."))?; 
 
-        flow.ready_all();
+        flow.ready_all().context(format!("Unable to make all nodes ready."))?;
+    
+        self.run_update_loop(&flow, scheduler);
 
-        if self.controller.lock().unwrap().state() == ExecutorState::Ready {
-            
-            self.run_update_loop(&flow, scheduler);
-        }
+        flow.shutdown_all().context(format!("Unable to shutdown all nodes"))?;
 
-        flow.shutdown_all();
+        Ok(())
     }
 
     fn controller(&self) -> Arc<Mutex<ExecutionController>> {
